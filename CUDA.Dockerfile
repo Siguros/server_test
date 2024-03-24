@@ -8,24 +8,31 @@ FROM nvidia/cuda:${CUDA_VERSION}-devel-ubuntu22.04 AS build-env
 # Install as root
 USER root
 
-# 필수 패키지 설치
+# 필수 패키지 설치, OpenBLAS 설치 추가
 RUN apt-get update && \
     DEBIAN_FRONTEND="noninteractive" apt-get install --yes \
     --no-install-recommends \
-    cmake git linux-headers-generic python3 python3-dev python3-pip python-is-python3 \
-    wget tar openssh-server && \
+    cmake \
+    git \
+    linux-headers-generic \
+    python3 python3-dev python3-pip python-is-python3 \
+    wget \
+    tar \
+    openssh-server \
+    libopenblas-dev && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Python 빌드 의존성 설치
+# Python 빌드 의존성 및 torch 관련 패키지 설치
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir pybind11 scikit-build protobuf mypy
+    pip install --no-cache-dir pybind11 scikit-build protobuf mypy && \
+    pip install torch torchvision torchmetrics
 
-# 사용자 추가
+# 사용자 추가 및 권한 설정
 ARG USERNAME=coder
 ARG USERID=1000
 ARG GROUPID=1000
 RUN groupadd -g ${GROUPID} ${USERNAME} && \
-    useradd ${USERNAME} --create-home --uid ${USERID} --gid ${GROUPID} --shell=/bin/bash
+    useradd -m ${USERNAME} --uid ${USERID} --gid ${GROUPID} --shell=/bin/bash
 
 # MKL 라이브러리 복사
 COPY --from=mkl-env /opt/intel/oneapi/mkl /opt/intel/oneapi/mkl
@@ -33,7 +40,7 @@ COPY --from=mkl-env /opt/intel/oneapi/mkl /opt/intel/oneapi/mkl
 # aihwkit 소스 복사 및 빌드
 COPY . /aihwkit
 RUN chown -R ${USERNAME}:${USERNAME} /aihwkit && \
-    pip install --no-cache-dir --no-warn-script-location torch torchvision torchmetrics aihwkit
+    pip install --no-cache-dir /aihwkit
 
 # JupyterLab, Anaconda 설치 및 설정
 RUN wget https://repo.anaconda.com/archive/Anaconda3-2021.05-Linux-x86_64.sh -O /tmp/anaconda.sh && \
