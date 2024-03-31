@@ -22,10 +22,11 @@ RUN apt-get update && \
     libopenblas-dev && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Python 빌드 의존성 및 torch 관련 패키지 설치
+# Python 빌드 의존성, torch 관련 패키지 및 VESSL CLI 설치
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir pybind11 scikit-build protobuf mypy && \
-    pip install torch torchvision torchmetrics
+    pip install torch torchvision torchmetrics && \
+    pip install vessl
 
 # 사용자 추가 및 권한 설정
 ARG USERNAME=coder
