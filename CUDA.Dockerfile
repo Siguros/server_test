@@ -26,7 +26,8 @@ RUN apt-get update && \
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir pybind11 scikit-build protobuf mypy && \
     pip install torch torchvision torchmetrics && \
-    pip install vessl
+    pip install vessl && \
+    echo 'export PATH=$PATH:/root/.local/bin' >> /etc/profile.d/vessl_path.sh
 
 # 사용자 추가 및 권한 설정
 ARG USERNAME=coder
@@ -70,4 +71,5 @@ USER ${USERNAME}
 WORKDIR /aihwkit
 
 # JupyterLab 및 SSH 서버 시작 스크립트
-CMD ["/bin/bash", "-c", "/usr/sbin/sshd && jupyter lab --ip=0.0.0.0 --no-browser --allow-root"]
+CMD /bin/bash -c "cd /aihwkit && source /opt/conda/bin/activate aihwkit && cd examples/python && python 01_simple_layer.py"
+
