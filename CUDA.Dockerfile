@@ -27,7 +27,8 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir pybind11 scikit-build protobuf mypy && \
     pip install torch torchvision torchmetrics && \
     pip install vessl && \
-    echo 'export PATH=$PATH:/root/.local/bin' >> /etc/profile.d/vessl_path.sh
+    echo 'export PATH=$PATH:/root/.local/bin' >> /etc/profile.d/vessl_path.sh && \
+    echo 'export PATH=$PATH:/root/.local/bin' >> ~/.bashrc
 
 # 사용자 추가 및 권한 설정
 ARG USERNAME=coder
@@ -53,7 +54,7 @@ RUN wget https://repo.anaconda.com/archive/Anaconda3-2021.05-Linux-x86_64.sh -O 
     /opt/conda/bin/conda create -y -n aihwkit python=3.9 && \
     /opt/conda/bin/conda run -n aihwkit pip install pandas matplotlib openpyxl 'wandb>=0.12.10'
 
-# sshd 설정 (예시, 실제 설정은 환경에 따라 다를 수 있음)
+# sshd 설정
 RUN mkdir /var/run/sshd && \
     echo 'root:root' | chpasswd && \
     sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
@@ -72,4 +73,3 @@ WORKDIR /aihwkit
 
 # JupyterLab 및 SSH 서버 시작 스크립트
 CMD /bin/bash -c "cd /aihwkit && source /opt/conda/bin/activate aihwkit && cd examples/python && python 01_simple_layer.py"
-
